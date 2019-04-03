@@ -188,7 +188,7 @@ app.get("/theme/random-theme", function (req, res) {
     Theme.find({}).then(function (data) {
       var json = data;
       var randomTheme = json[Math.floor(Math.random() * json.length)];
-      res.send(randomTheme.themeobj);
+      res.send({randomObj: randomTheme.themeobj});
     });
   }
   Random()
