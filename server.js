@@ -73,27 +73,6 @@ app.use(function (req, res, next) {
 
 
 
-// Test route.
-/*
-app.get("/test", function(req, res) {
-
-  function hej() {
-    
-    Theme.find({}).then(function(data) {
-      var json = data;
-
-      var randomTheme = json[Math.floor(Math.random() * json.length)];
-      
-      
-      console.log(randomTheme);
-    });
-
-  }
-  hej()
-
-});
-*/
-
 
 
 
@@ -210,11 +189,6 @@ app.post("/theme/post", function(req, res) {
 
 
 
-
-
-
-
-
 // Shows all the questions, this is for admin.
 app.get("/question", function (req, res) {
 
@@ -224,19 +198,34 @@ app.get("/question", function (req, res) {
 
 });
 
+
 // Randomize a random string from json array and send it back.
 app.get("/question/random-question", function (req, res) {
 
   function Random() {
-    Theme.find({}).then(function (data) {
+    Question.find({}).then(function (data) {
       var json = data;
       var randomQuestion = json[Math.floor(Math.random() * json.length)];
-      res.send(randomQuestion.questionobj);
+      res.send({randomObj: randomQuestion.questionobj});
     });
   }
   Random()
 
 });
+/* Save for later..
+// Post a new theme object to database.
+app.post("/question/post", function(req, res) {
+  var question = new Question(req.body); //This creates a new object in the Themeschema.
+
+  // Saves the new object to the mongodb database.
+  question.save( function(error, data) {
+    res.json(data);
+  });
+
+});
+*/
+
+
 
 
 // Listen to process environment port, or port 3000.
