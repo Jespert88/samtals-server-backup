@@ -101,7 +101,32 @@ app.post("/register", function (req, res) {
       res.send(false);
       console.log("User already exists");
     } else {
-      var user = new User(req.body); //This creates a new object in the Userschema.
+
+      // This function generate a random qr code.
+      function makeQR(length) {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      
+        for (var i = 0; i < length; i++)
+          text += possible.charAt(Math.floor(Math.random() * possible.length));
+      
+        return text;
+      }
+      
+
+      // This is the user object with all the keys that exist in the db.
+      var userObj = {
+        username: req.body.username,
+        password: req.body.password,
+        points: 0,
+        qrcode: makeQR(10)
+      };
+
+
+
+
+
+      var user = new User(userObj); //This creates a new object in the Userschema.
 
       // Saves the new object to the mongodb database.
       user.save(function (error, data) {
