@@ -168,6 +168,29 @@ app.post("/get-user-data", function (req, res) {
 });
 
 
+//Get existing user info by id. (This route is for the profile, so that user can send req to update from a button.)
+app.post("/get-user-info-by-id", function () {
+
+  User.find({_id: ObjectId(req.body.id)}, function(err, data) {
+      if (data[0] != null) {
+        res.send(data)
+      } else {
+        res.send(err)
+      }
+    });    
+  
+});
+
+
+
+
+
+
+
+
+
+
+
 // Delete a existing user object with it's id. 
 app.delete("/delete/user", function (req, res) {
   var id = req.body.id;
