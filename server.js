@@ -144,13 +144,27 @@ app.post("/login", function (req, res) {
 
   User.find({ username: req.body.username, password: req.body.password }).then(function (data) {
     if (data[0] != null) {
-      res.send(true);
+      res.send(data[0]);
       console.log("Login successful");
     } else {
       res.send(false);
       console.log("Login failed");
     }
   });
+});
+
+
+//Get existing user info.
+app.post("/get-user-data", function (req, res) {
+
+  User.find({ username: req.body.username }, function(err, data) {
+      if (data[0] != null) {
+        res.send(data)
+      } else {
+        res.send(err)
+      }
+    });    
+  
 });
 
 
