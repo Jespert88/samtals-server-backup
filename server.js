@@ -22,6 +22,18 @@ var UserSchema = new Schema({
     type: String
   },
 
+  hours: {
+    type: Number
+  },
+
+  minutes: {
+    type: Number
+  },
+
+  seconds: {
+    type: Number
+  },
+
   points: {
     type: Number
   },
@@ -118,6 +130,9 @@ app.post("/register", function (req, res) {
       var userObj = {
         username: req.body.username,
         password: req.body.password,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
         points: 0,
         qrcode: makeQR(10)
       };
