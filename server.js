@@ -3,8 +3,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const mongoose = require('mongoose');
+const ObjectId = require('mongodb').ObjectID;
 mongoose.connect('mongodb+srv://jeppe:123@skolprojekt-0pyfl.mongodb.net/samtalsdb?retryWrites=true', { useNewUrlParser: true });
-
 
 
 // Varible for all the models / collections.
@@ -14,33 +14,19 @@ var Schema = mongoose.Schema;
 // User Schema.
 var UserSchema = new Schema({
 
-  username: {
-    type: String
-  },
+  username: { type: String },
 
-  password: {
-    type: String
-  },
+  password: { type: String },
 
-  hours: {
-    type: Number
-  },
+  hours: { type: Number },
 
-  minutes: {
-    type: Number
-  },
+  minutes: { type: Number },
 
-  seconds: {
-    type: Number
-  },
+  seconds: { type: Number },
 
-  points: {
-    type: Number
-  },
-
-  qrcode: {
-    type: String
-  }
+  points: { type: Number },
+  
+  qrcode: { type: String }
 
 });
 var User = mongoose.model("User", UserSchema);
@@ -55,7 +41,6 @@ var ThemeSchema = new Schema({
 var Theme = mongoose.model("Theme", ThemeSchema);
 
 
-
 // Question Schema.
 var QuestionSchema = new Schema({
   questionobj: {
@@ -67,8 +52,8 @@ var Question = mongoose.model("Question", QuestionSchema);
 
 
 // body-parser extract the entire body portion of an incoming request stream and exposes it on req.body 
-//. The middleware was a part of Express.js earlier but now you have to install it separately. 
-//This body-parser module parses the JSON, buffer, string and URL encoded data submitted using HTTP POST request.
+// The middleware was a part of Express.js earlier but now you have to install it separately. 
+// This body-parser module parses the JSON, buffer, string and URL encoded data submitted using HTTP POST request.
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -86,20 +71,22 @@ app.use(function (req, res, next) {
 
 
 
-
-
 // Welcome route.
 app.get("/", function (req, res) {
-  res.send("Hello World from the server")
+  res.send("Hello World from the samtals-server")
 });
 
 
 // Shows all users in json, this is for admin. 
-app.get("/users", function (req, res) {
+app.get("/users", function (req, res, err) {
 
-  User.find({}).then(function (data) {
-    res.json(data);
-  });
+  if (!err) {
+    User.find({}).then(function (data) {
+      res.json(data);
+    });
+  } else {
+    console.log(err);
+  }
 
 });
 
@@ -138,9 +125,6 @@ app.post("/register", function (req, res) {
       };
 
 
-
-
-
       var user = new User(userObj); //This creates a new object in the Userschema.
 
       // Saves the new object to the mongodb database.
@@ -153,10 +137,14 @@ app.post("/register", function (req, res) {
   });
 });
 
-// .
-app.post("/login", function (req, res) {
-  // Check if given username and password exist and match in db. If they exist, respond with true. If they don't exist, respond with false.
 
+
+/*
+  Check if given username and password exist and match in db. 
+  If they exist, respond with that object from db else respond with false.
+*/
+app.post("/login", function (req, res) {
+ 
   User.find({ username: req.body.username, password: req.body.password }).then(function (data) {
     if (data[0] != null) {
       res.send(data[0]);
@@ -166,10 +154,11 @@ app.post("/login", function (req, res) {
       console.log("Login failed");
     }
   });
+
 });
 
 
-//Get existing user info.
+//Get data from existing user by matching username to req.body.username (Input from the user).
 app.post("/get-user-data", function (req, res) {
 
   User.find({ username: req.body.username }, function(err, data) {
@@ -184,19 +173,39 @@ app.post("/get-user-data", function (req, res) {
 
 
 //Get existing user info by id. (This route is for the profile, so that user can send req to update from a button.)
-app.post("/get-user-info-by-id", function () {
+app.post("/get-user-info-by-id", function (req, res) {
+  User.findOne({ "_id": new ObjectId(req.body._id) }, function (err, data) {
 
-  User.find({_id: ObjectId(req.body.id)}, function(err, data) {
-      if (data[0] != null) {
-        res.send(data)
-      } else {
-        res.send(err)
-      }
-    });    
-  
+    if (data[0] != null) {
+      res.send(data);
+      console.log(data);
+    } else {
+      res.send(err);
+      console.log(err);
+    }
+  });
 });
 
 
+//Post data to existing user.
+app.post("/post-data-to-user", function (req, res) {
+  User.findOneAndUpdate({ "_id": req.body._id },
+  {
+      $set: {
+          "hours": req.body.hours,
+          "minutes": req.body.minutes,
+          "seconds": req.body.seconds,
+          "points": req.body.points
+      }
+   }, { new: true }, (err, doc) => {
+      if (!err) { 
+        console.log(doc);
+      }
+      else {
+        console.log('Error during update : ' + err);
+      }
+   });
+});
 
 
 
