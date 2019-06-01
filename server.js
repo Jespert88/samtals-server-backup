@@ -6,6 +6,12 @@ const mongoose = require('mongoose');
 const ObjectId = require('mongodb').ObjectID;
 mongoose.connect('mongodb+srv://jeppe:123@skolprojekt-0pyfl.mongodb.net/samtalsdb?retryWrites=true', { useNewUrlParser: true });
 
+const morgan = require('morgan');
+app.use(morgan("tiny"));
+
+
+
+
 
 // Varible for all the models / collections.
 var Schema = mongoose.Schema;
@@ -160,29 +166,29 @@ app.post("/login", function (req, res) {
 
 //Get data from existing user by matching username to req.body.username (Input from the user).
 app.post("/get-user-data", function (req, res) {
-
   User.find({ username: req.body.username }, function(err, data) {
       if (data[0] != null) {
-        res.send(data)
+        res.send(data[0]);
       } else {
-        res.send(err)
+        res.send(err);
       }
-    });    
-  
+    });
 });
 
 
+
+
+//"_id": new ObjectId(req.body._id)
 //Get existing user info by id. (This route is for the profile, so that user can send req to update from a button.)
 app.post("/get-user-info-by-id", function (req, res) {
   User.findOne({ "_id": new ObjectId(req.body._id) }, function (err, data) {
 
-    if (data[0] != null) {
-      res.send(data);
-      console.log(data);
+    if (!err) {
+      console.log("Data sent.." + data);
     } else {
-      res.send(err);
       console.log(err);
     }
+
   });
 });
 
@@ -190,12 +196,16 @@ app.post("/get-user-info-by-id", function (req, res) {
 //Post data to existing user.
 app.post("/post-data-to-user", function (req, res) {
   User.findOneAndUpdate({ "_id": req.body._id },
+  
+    //Update to existing one  $set:
+    //Add to existing one $inc:
+  
   {
-      $set: {
+      $inc: {
           "hours": req.body.hours,
           "minutes": req.body.minutes,
           "seconds": req.body.seconds,
-          "points": req.body.points
+          "points": req.body.points,
       }
    }, { new: true }, (err, doc) => {
       if (!err) { 
@@ -206,13 +216,6 @@ app.post("/post-data-to-user", function (req, res) {
       }
    });
 });
-
-
-
-
-
-
-
 
 
 // Delete a existing user object with it's id. 
@@ -229,11 +232,6 @@ app.delete("/delete/user", function (req, res) {
 
   });
 });
-
-
-
-
-
 
 
 // Shows all the themes, this is for admin.
@@ -260,20 +258,6 @@ app.get("/theme/random-theme", function (req, res) {
 
 });
 
-/* Save this code.
-// Post a new theme object to database.
-app.post("/theme/post", function(req, res) {
-  var theme = new Theme(req.body); //This creates a new object in the Themeschema.
-
-  // Saves the new object to the mongodb database.
-  theme.save( function(error, data) {
-    res.json(data);
-  });
-
-});
-*/
-
-
 
 // Shows all the questions, this is for admin.
 app.get("/question", function (req, res) {
@@ -298,20 +282,6 @@ app.get("/question/random-question", function (req, res) {
   Random()
 
 });
-/* Save for later..
-// Post a new theme object to database.
-app.post("/question/post", function(req, res) {
-  var question = new Question(req.body); //This creates a new object in the Themeschema.
-
-  // Saves the new object to the mongodb database.
-  question.save( function(error, data) {
-    res.json(data);
-  });
-
-});
-*/
-
-
 
 
 // Listen to process environment port, or port 3000.
